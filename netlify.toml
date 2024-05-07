@@ -1,6 +1,12 @@
-[build]
-  command = "node server.js"
-  publish = "."
+[functions]
+  external_node_modules = ["express"]
+  node_bundler = "esbuild"
 
-[build.environment]
-  NODE_ENV = "production"
+[build]
+  command = "node api.js"
+  
+[[redirects]]
+  force = true
+  from = "/api/*"
+  status = 200
+  to = "/.netlify/functions/api/:splat"
