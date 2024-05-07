@@ -1,10 +1,10 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "api.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "start": "node api.js"
   },
   "keywords": [],
   "author": "",
@@ -12,6 +12,7 @@
   "description": "",
   "dependencies": {
     "express": "^4.19.2",
-    "mongoose": "^8.3.4"
+    "mongoose": "^8.3.4",
+    "serverless-http": "^3.2.0"
   }
 }

@@ -1,23 +1,24 @@
 import express from "express"
+import serverless from "serverless-http"
 import drawingDetails from "./drawingDetails.js"
 import { activities, characters } from "./data.js"
 
-const app = express()
-const PORT = process.env.PORT || 3001
+const api = express()
+const router = express.Router()
 
-app.get("/drawing-details", (req, res) => {
+router.get("/drawing-details", (req, res) => {
   res.json(drawingDetails)
 })
 
-app.get("/activities", (req, res) => {
+router.get("/activities", (req, res) => {
   res.json(activities)
 })
 
-app.get("/characters", (req, res) => {
+router.get("/characters", (req, res) => {
   res.json(characters)
 })
 
-app.get("/activities/:id", (req, res) => {
+router.get("/activities/:id", (req, res) => {
   const id = parseInt(req.params.id)
   const activity = activities.find((activity) => activity.id === id)
   if (!activity) {
@@ -26,7 +27,7 @@ app.get("/activities/:id", (req, res) => {
   res.json(activity)
 })
 
-app.get("/characters/:id", (req, res) => {
+router.get("/characters/:id", (req, res) => {
   const id = parseInt(req.params.id)
   const character = characters.find((character) => character.id === id)
   if (!character) {
@@ -40,19 +41,19 @@ const getRandomItem = (items) => {
   return items[randomIndex]
 }
 
-app.get("/random-activity", (req, res) => {
+router.get("/random-activity", (req, res) => {
   const randomActivity = getRandomItem(activities)
   res.json(randomActivity)
 })
 
-app.get("/random-character", (req, res) => {
+router.get("/random-character", (req, res) => {
   const randomCharacter = getRandomItem(characters)
   res.json(randomCharacter)
 })
 
 const getRoutes = () => {
   const routes = []
-  app._router.stack.forEach((layer) => {
+  router.stack.forEach((layer) => {
     if (layer.route) {
       const route = {
         path: layer.route.path,
@@ -64,11 +65,11 @@ const getRoutes = () => {
   return routes
 }
 
-app.get("/", (req, res) => {
+router.get("/", (req, res) => {
   const routes = getRoutes()
   res.json(routes)
 })
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`)
-})
+api.use("/.netlify/functions/api", router)
+
+export const handler = serverless(api)
