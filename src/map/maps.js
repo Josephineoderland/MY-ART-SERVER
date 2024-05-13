@@ -10,7 +10,6 @@ const searchArtGalleries = async (query) => {
       {
         query: query,
         type: "art_gallery",
-        region: "eu",
       },
       (err, response) => {
         if (err) {
