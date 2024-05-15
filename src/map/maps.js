@@ -27,9 +27,8 @@ const searchArtGalleries = async (query) => {
 const mapsRouter = express.Router()
 
 mapsRouter.get("/art-galleries", async (req, res) => {
-  const { query } = req.query 
+  const { query } = req.query
   try {
-    
     const artGalleries = await searchArtGalleries(query)
     res.json(artGalleries)
   } catch (error) {
