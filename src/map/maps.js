@@ -5,12 +5,11 @@ const googleMapsClient = createClient({
   key: "AIzaSyC3bo_j2nNUnH_7w7cDaR2p1WnRvN8-1w4",
 })
 
-// Ändra funktionen för att inkludera cityName som en parameter
-const searchArtGalleries = async (query, cityName) => {
+const searchArtGalleries = async (query) => {
   return new Promise((resolve, reject) => {
     googleMapsClient.places(
       {
-        query: "art galleries in " + cityName,
+        query: "art galleries in ",
       },
       (err, response) => {
         if (err) {
@@ -28,10 +27,10 @@ const searchArtGalleries = async (query, cityName) => {
 const mapsRouter = express.Router()
 
 mapsRouter.get("/art-galleries", async (req, res) => {
-  const { query, cityName } = req.query // Lägg till cityName här om du vill använda det från förfrågan
+  const { query } = req.query 
   try {
-    // Lägg till cityName som ett argument till searchArtGalleries
-    const artGalleries = await searchArtGalleries(query, cityName)
+    
+    const artGalleries = await searchArtGalleries(query)
     res.json(artGalleries)
   } catch (error) {
     console.error("Error searching for art galleries:", error)
