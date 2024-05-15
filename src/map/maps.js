@@ -30,6 +30,7 @@ const mapsRouter = express.Router()
 
 mapsRouter.get("/art-galleries", async (req, res) => {
   const { query, latitude, longitude } = req.query
+
   try {
     const artGalleries = await searchArtGalleries(query, latitude, longitude)
     res.json(artGalleries)

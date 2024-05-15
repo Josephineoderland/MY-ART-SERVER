@@ -1,11 +1,18 @@
 import express from "express"
 import mongoose from "mongoose"
+import multer from "multer"
+import { fileURLToPath } from "url"
+import path from "path"
 import ChatMessage from "./chatMessageModel.js"
 import dotenv from "dotenv"
 
 dotenv.config()
 
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 const router = express.Router()
+const upload = multer({ dest: "uploads/" })
 
 mongoose.connect(`mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}`, {
   dbName: process.env.DB_NAME,
@@ -21,8 +28,12 @@ db.once("open", () => {
 
 router.use(express.json())
 
-router.post("/messages", async (req, res) => {
-  const { text, image, user } = req.body
+router.use("/uploads", express.static(path.join(__dirname, "uploads")))
+
+router.post("/messages", upload.single("image"), async (req, res) => {
+  const { text, user } = req.body
+  const image = req.file ? req.file.path : null
+
   try {
     const newMessage = new ChatMessage({ text, image, user })
     await newMessage.save()
