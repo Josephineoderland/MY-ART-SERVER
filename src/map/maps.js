@@ -9,7 +9,7 @@ const searchArtGalleries = async (query) => {
   return new Promise((resolve, reject) => {
     googleMapsClient.places(
       {
-        query: "art galleries in ",
+        query: "art galleries",
       },
       (err, response) => {
         if (err) {
