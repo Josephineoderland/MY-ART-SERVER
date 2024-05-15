@@ -11,7 +11,7 @@ const searchArtGalleries = async (query, latitude, longitude) => {
       {
         query: "art galleries",
         radius: 5000,
-        location: [latitude, longitude]
+        location: [latitude, longitude],
       },
       (err, response) => {
         if (err) {
@@ -30,11 +30,6 @@ const mapsRouter = express.Router()
 
 mapsRouter.get("/art-galleries", async (req, res) => {
   const { query, latitude, longitude } = req.query
-  // const { latitude } = req.latitude
-  // const { longitude } = req.longitude
-  // console.log(req.query.)
-  console.log(longitude)
-  console.log(latitude)
   try {
     const artGalleries = await searchArtGalleries(query, latitude, longitude)
     res.json(artGalleries)
