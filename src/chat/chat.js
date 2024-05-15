@@ -1,18 +1,18 @@
 import express from "express"
 import mongoose from "mongoose"
 import multer from "multer"
-import { fileURLToPath } from "url" 
-import path from "path" 
+import { fileURLToPath } from "url"
+import path from "path"
 import ChatMessage from "./chatMessageModel.js"
 import dotenv from "dotenv"
 
 dotenv.config()
 
-const __filename = fileURLToPath(import.meta.url) 
+const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const router = express.Router()
-const upload = multer({ dest: "uploads/" })
+const upload = multer({ dest: "chat/uploads/" })
 
 mongoose.connect(`mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}`, {
   dbName: process.env.DB_NAME,
