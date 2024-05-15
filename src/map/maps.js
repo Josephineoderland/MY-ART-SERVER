@@ -1,7 +1,7 @@
 import { createClient } from "@google/maps"
 
 const googleMapsClient = createClient({
-  key: "AIzaSyBjm6qXutJnSumjn5Loz76rU_UHgM52HoA",
+  key: "AIzaSyC3bo_j2nNUnH_7w7cDaR2p1WnRvN8-1w4",
 })
 
 const searchArtGalleries = async (query) => {
