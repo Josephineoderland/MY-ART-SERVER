@@ -5,11 +5,13 @@ const googleMapsClient = createClient({
   key: "AIzaSyC3bo_j2nNUnH_7w7cDaR2p1WnRvN8-1w4",
 })
 
-const searchArtGalleries = async (query) => {
+const searchArtGalleries = async (query, latitude, longitude) => {
   return new Promise((resolve, reject) => {
     googleMapsClient.places(
       {
         query: "art galleries",
+        radius: 5000,
+        location: [latitude, longitude]
       },
       (err, response) => {
         if (err) {
@@ -27,9 +29,14 @@ const searchArtGalleries = async (query) => {
 const mapsRouter = express.Router()
 
 mapsRouter.get("/art-galleries", async (req, res) => {
-  const { query } = req.query
+  const { query, latitude, longitude } = req.query
+  // const { latitude } = req.latitude
+  // const { longitude } = req.longitude
+  // console.log(req.query.)
+  console.log(longitude)
+  console.log(latitude)
   try {
-    const artGalleries = await searchArtGalleries(query)
+    const artGalleries = await searchArtGalleries(query, latitude, longitude)
     res.json(artGalleries)
   } catch (error) {
     console.error("Error searching for art galleries:", error)
