@@ -5,6 +5,7 @@ import { fileURLToPath } from "url"
 import path from "path"
 import ChatMessage from "./chatMessageModel.js"
 import dotenv from "dotenv"
+import fs from "fs"
 
 dotenv.config()
 
@@ -32,9 +33,16 @@ router.use("/uploads", express.static(path.join(__dirname, "uploads")))
 
 router.post("/messages", upload.single("image"), async (req, res) => {
   const { text, user } = req.body
-  const image = req.file ? req.file.path : null
-
+  const image = req.file
+    ? `${process.env.FILE_UPLOAD_DIR}/${req.file.filename}`
+    : null
   try {
+    if (image) {
+      const fileName = `${process.env.FILE_UPLOAD_DIR}/${req.file.filename}`
+      fs.writeFile(fileName, req.file.buffer, (a) => {
+        console.log(a)
+      })
+    }
     const newMessage = new ChatMessage({ text, image, user })
     await newMessage.save()
     res.status(201).json(newMessage)
@@ -55,6 +63,22 @@ router.get("/messages", async (req, res) => {
     res.status(500).json({
       error: "Ett fel uppstod vid hämtning av meddelanden",
     })
+  }
+})
+
+router.post("/messages/:messagesId/like", async (req, res) => {
+  const { messagesId } = req.params
+
+  try {
+    const messages = await ChatMessage.findById(messagesId)
+    if (!messages) {
+      return res.status(404).json({ message: "Thought not found" })
+    }
+    messages.hearts++
+    await messages.save()
+    res.json(messages)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
   }
 })
 
