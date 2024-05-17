@@ -8,7 +8,13 @@ import { mapsRouter } from "./map/maps.js"
 const app = express()
 const port = process.env.SERVER_PORT || 3002
 
-app.use(cors())
+app.use(
+  cors({
+    origin: "http://localhost:3001",
+    methods: "GET,POST,PUT,DELETE",
+    allowedHeaders: "Content-Type,Authorization",
+  })
+)
 
 app.get("/", (req, res) => {
   const endpoints = listEndpoints(app)

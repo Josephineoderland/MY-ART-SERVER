@@ -29,7 +29,10 @@ db.once("open", () => {
 
 router.use(express.json())
 
-router.use("/uploads", express.static(path.join(__dirname, "uploads")))
+router.use(
+  "/uploads",
+  express.static(path.join(__dirname, process.env.FILE_UPLOAD_DIR))
+)
 
 router.post("/messages", upload.single("image"), async (req, res) => {
   console.log("Request body:", req.body)
