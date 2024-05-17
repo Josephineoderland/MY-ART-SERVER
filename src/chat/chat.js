@@ -84,26 +84,20 @@ router.get("/messages", async (req, res) => {
 })
 
 router.post("/messages/:id/like", async (req, res) => {
-  const userId = req.user.id 
   const messageId = req.params.id
-
   try {
     const message = await ChatMessage.findById(messageId)
     if (!message) {
       return res.status(404).json({ error: "Meddelandet hittades inte." })
     }
-    const hasLiked = message.likes.some((likeId) => likeId.equals(userId))
-    if (hasLiked) {
-      message.likes = message.likes.filter((likeId) => !likeId.equals(userId))
-    } else {
-      message.likes.push(userId)
-    }
-
+    message.likes++
     await message.save()
     res.json(message)
   } catch (error) {
-    console.error("Fel vid hantering av like:", error)
-    res.status(500).json({ error: "Ett fel uppstod vid hantering av like." })
+    console.error("Fel vid gillande av meddelandet:", error)
+    res
+      .status(500)
+      .json({ error: "Ett fel uppstod vid gillande av meddelandet." })
   }
 })
 
