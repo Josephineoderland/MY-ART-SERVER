@@ -35,6 +35,10 @@ router.use(
   express.static(path.join(__dirname, process.env.FILE_UPLOAD_DIR))
 )
 
+upload.on("error", (error) => {
+  console.error("Error during file upload:", error)
+})
+
 router.post("/messages", upload.single("image"), async (req, res) => {
   console.log("Request body:", req.body)
 
