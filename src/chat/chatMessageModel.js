@@ -4,7 +4,7 @@ const chatMessageSchema = new mongoose.Schema({
   text: { type: String, required: true },
   image: String,
   createdAt: { type: Date, default: Date.now },
-  likes: { type: Number, default: 0 },
+  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 })
 
 const ChatMessage = mongoose.model("ChatMessage", chatMessageSchema)
