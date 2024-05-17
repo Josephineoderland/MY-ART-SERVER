@@ -13,7 +13,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const router = express.Router()
-const upload = multer({ dest: "uploads/" })
+const upload = multer({ dest: process.env.FILE_UPLOAD_DIR })
 
 mongoose.connect(`mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}`, {
   dbName: process.env.DB_NAME,
@@ -32,17 +32,34 @@ router.use(express.json())
 router.use("/uploads", express.static(path.join(__dirname, "uploads")))
 
 router.post("/messages", upload.single("image"), async (req, res) => {
+  console.log("Request body:", req.body)
+
   const { text, user } = req.body
   const image = req.file
     ? `${process.env.FILE_UPLOAD_DIR}/${req.file.filename}`
     : null
-  try {
-    if (image) {
+
+  if (!text || text.trim() === "") {
+    return res.status(400).json({ error: "Text is required" })
+  }
+
+  if (req.file && req.file.buffer) {
+    try {
       const fileName = `${process.env.FILE_UPLOAD_DIR}/${req.file.filename}`
-      fs.writeFile(fileName, req.file.buffer, (a) => {
-        console.log(a)
+      fs.writeFile(fileName, req.file.buffer, (err) => {
+        if (err) {
+          console.error("Error writing file:", err)
+          return res.status(500).json({ error: "Error writing file" })
+        }
+        console.log("File written successfully.")
       })
+    } catch (error) {
+      console.error("Error handling file:", error)
+      return res.status(500).json({ error: "Error handling file" })
     }
+  }
+
+  try {
     const newMessage = new ChatMessage({ text, image, user })
     await newMessage.save()
     res.status(201).json(newMessage)
@@ -66,19 +83,21 @@ router.get("/messages", async (req, res) => {
   }
 })
 
-router.post("/messages/:messagesId/like", async (req, res) => {
-  const { messagesId } = req.params
-
+router.post("/messages/:id/like", async (req, res) => {
+  const messageId = req.params.id
   try {
-    const messages = await ChatMessage.findById(messagesId)
-    if (!messages) {
-      return res.status(404).json({ message: "Thought not found" })
+    const message = await ChatMessage.findById(messageId)
+    if (!message) {
+      return res.status(404).json({ error: "Meddelandet hittades inte." })
     }
-    messages.hearts++
-    await messages.save()
-    res.json(messages)
+    message.likes++
+    await message.save()
+    res.json(message)
   } catch (error) {
-    res.status(500).json({ message: error.message })
+    console.error("Fel vid gillande av meddelandet:", error)
+    res
+      .status(500)
+      .json({ error: "Ett fel uppstod vid gillande av meddelandet." })
   }
 })
 
