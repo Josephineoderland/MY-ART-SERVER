@@ -11,83 +11,69 @@ dotenv.config()
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-
 const router = express.Router()
-const upload = multer({
-  dest: path.join(__dirname, process.env.FILE_UPLOAD_DIR),
-})
-
+const upload = multer({ dest: "uploads/" })
 mongoose.connect(`mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}`, {
   dbName: process.env.DB_NAME,
   user: process.env.DB_USER,
   pass: process.env.DB_PASS,
 })
-
 const db = mongoose.connection
 db.on("error", console.error.bind(console, "Anslutningsfel:"))
 db.once("open", () => {
   console.log("Ansluten till databasen")
 })
-
 router.use(express.json())
-router.use(
-  "/uploads",
-  express.static(path.join(__dirname, process.env.FILE_UPLOAD_DIR))
-)
-
-upload.on("error", (error) => {
-  console.error("Error during file upload:", error)
-})
+router.use("/uploads", express.static(path.join(__dirname, "uploads")))
 
 router.post("/messages", upload.single("image"), async (req, res) => {
-  console.log("Request body:", req.body)
-
   const { text, user } = req.body
-  const image = req.file ? `/uploads/${req.file.filename}` : null
 
-  if (!text || text.trim() === "") {
-    return res.status(400).json({ error: "Text is required" })
-  }
-
+  const image = req.file
+    ? `${process.env.FILE_UPLOAD_DIR}/${req.file.filename}`
+    : null
   try {
+    if (image) {
+      const fileName = `${process.env.FILE_UPLOAD_DIR}/${req.file.filename}`
+      fs.writeFile(fileName, req.file.buffer, (a) => {
+        console.log(a)
+      })
+    }
     const newMessage = new ChatMessage({ text, image, user })
     await newMessage.save()
     res.status(201).json(newMessage)
   } catch (error) {
     console.error("Fel vid hantering av meddelandet:", error)
-    res
-      .status(500)
-      .json({ error: "Ett fel uppstod vid hantering av meddelandet" })
+    res.status(500).json({
+      error: "Ett fel uppstod vid hantering av meddelandet",
+    })
   }
 })
-
 router.get("/messages", async (req, res) => {
   try {
     const messages = await ChatMessage.find()
     res.json(messages)
   } catch (error) {
     console.error("Fel vid hämtning av meddelanden:", error)
-    res
-      .status(500)
-      .json({ error: "Ett fel uppstod vid hämtning av meddelanden" })
+    res.status(500).json({
+      error: "Ett fel uppstod vid hämtning av meddelanden",
+    })
   }
 })
 
-router.post("/messages/:id/like", async (req, res) => {
-  const messageId = req.params.id
+router.post("/messages/:messagesId/like", async (req, res) => {
+  const { messagesId } = req.params
+
   try {
-    const message = await ChatMessage.findById(messageId)
-    if (!message) {
-      return res.status(404).json({ error: "Meddelandet hittades inte." })
+    const messages = await ChatMessage.findById(messagesId)
+    if (!messages) {
+      return res.status(404).json({ message: "Thought not found" })
     }
-    message.likes++
-    await message.save()
-    res.json(message)
+    messages.hearts++
+    await messages.save()
+    res.json(messages)
   } catch (error) {
-    console.error("Fel vid gillande av meddelandet:", error)
-    res
-      .status(500)
-      .json({ error: "Ett fel uppstod vid gillande av meddelandet." })
+    res.status(500).json({ message: error.message })
   }
 })
 
