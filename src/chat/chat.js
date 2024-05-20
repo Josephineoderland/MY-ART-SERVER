@@ -41,6 +41,9 @@ router.post("/messages", upload.single("image"), async (req, res) => {
   if (!text || text.trim() === "") {
     return res.status(400).json({ error: "Text is required" })
   }
+  if (!user || user.trim() === "") {
+    return res.status(400).json({ error: "User is required" })
+  }
 
   try {
     const newMessage = new ChatMessage({ text, image, user })

@@ -5,6 +5,7 @@ const chatMessageSchema = new mongoose.Schema({
   image: String,
   createdAt: { type: Date, default: Date.now },
   likes: { type: Number, default: 0 },
+  user: { type: String, required: true },
 })
 
 const ChatMessage = mongoose.model("ChatMessage", chatMessageSchema)
