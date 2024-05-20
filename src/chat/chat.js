@@ -1,7 +1,11 @@
 import express from "express"
 import mongoose from "mongoose"
+import multer from "multer"
+import { fileURLToPath } from "url"
+import path from "path"
 import ChatMessage from "./chatMessageModel.js"
 import dotenv from "dotenv"
+import fs from "fs"
 dotenv.config()
 
 const __filename = fileURLToPath(import.meta.url)
