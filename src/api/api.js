@@ -1,5 +1,6 @@
 import express from "express"
 import drawingDetails from "./drawingDetails.js"
+import placeFeel from "./placeFeel.js"
 import { activities, characters } from "./data.js"
 
 const router = express.Router()
@@ -7,6 +8,8 @@ const router = express.Router()
 router.get("/drawing-details", (req, res) => {
   res.json(drawingDetails)
 })
+
+router.use("/placeFeel", placeFeel)
 
 router.get("/activities", (req, res) => {
   res.json(activities)
