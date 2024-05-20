@@ -4,7 +4,12 @@ import ChatMessage from "./chatMessageModel.js"
 import dotenv from "dotenv"
 dotenv.config()
 
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 const router = express.Router()
+const upload = multer({
+  dest: path.join(__dirname, process.env.FILE_UPLOAD_DIR),
+})
 
 mongoose.connect(`mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}`, {
   dbName: process.env.DB_NAME,
@@ -19,10 +24,15 @@ db.once("open", () => {
 })
 
 router.use(express.json())
+router.use(
+  "/uploads",
+  express.static(path.join(__dirname, process.env.FILE_UPLOAD_DIR))
+)
 
-router.post("/messages", async (req, res) => {
+router.post("/messages", upload.single("image"), async (req, res) => {
   console.log("Request body:", req.body)
   const { text, user } = req.body
+  const image = req.file ? `/uploads/${req.file.filename}` : null
 
   if (!text || text.trim() === "") {
     return res.status(400).json({ error: "Text is required" })
@@ -32,7 +42,7 @@ router.post("/messages", async (req, res) => {
   }
 
   try {
-    const newMessage = new ChatMessage({ text, user })
+    const newMessage = new ChatMessage({ text, image, user })
     await newMessage.save()
     res.status(201).json(newMessage)
   } catch (error) {
