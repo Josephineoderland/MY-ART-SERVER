@@ -25,14 +25,15 @@ const generateToken = (user) => {
 }
 
 router.post("/register", async (req, res) => {
-  const { username, password, avatar } = req.body
+  const { username, password } = req.body
+
   try {
     const existingUser = await User.findOne({ username })
     if (existingUser) {
       return res.status(400).json({ message: "Username already taken" })
     }
 
-    const user = new User({ username, password, avatar })
+    const user = new User({ username, password })
     await user.save()
     const token = generateToken(user)
 
