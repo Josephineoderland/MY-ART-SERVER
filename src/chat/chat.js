@@ -5,15 +5,16 @@ import { fileURLToPath } from "url"
 import path from "path"
 import ChatMessage from "./chatMessageModel.js"
 import dotenv from "dotenv"
-import fs from "fs"
+
 dotenv.config()
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-const router = express.Router()
-const upload = multer({
+const chatImageUpload = multer({
   dest: path.join(__dirname, process.env.FILE_UPLOAD_DIR),
 })
+
+const router = express.Router()
 
 mongoose.connect(`mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}`, {
   dbName: process.env.DB_NAME,
@@ -32,9 +33,12 @@ router.use(
   "/uploads",
   express.static(path.join(__dirname, process.env.FILE_UPLOAD_DIR))
 )
+router.use(
+  "/avatars",
+  express.static(path.join(__dirname, process.env.AVATAR_UPLOAD_DIR))
+)
 
-router.post("/messages", upload.single("image"), async (req, res) => {
-  console.log("Request body:", req.body)
+router.post("/messages", chatImageUpload.single("image"), async (req, res) => {
   const { text, user } = req.body
   const image = req.file ? `/uploads/${req.file.filename}` : null
 
@@ -59,7 +63,10 @@ router.post("/messages", upload.single("image"), async (req, res) => {
 
 router.get("/messages", async (req, res) => {
   try {
-    const messages = await ChatMessage.find()
+    const messages = await ChatMessage.find().populate(
+      "user",
+      "username avatar"
+    )
     res.json(messages)
   } catch (error) {
     console.error("Fel vid hämtning av meddelanden:", error)
