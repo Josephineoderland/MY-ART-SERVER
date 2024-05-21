@@ -3,18 +3,8 @@ import jwt from "jsonwebtoken"
 import mongoose from "mongoose"
 import User from "./userModel.js"
 import dotenv from "dotenv"
-import multer from "multer"
-import { fileURLToPath } from "url"
-import path from "path"
 
 dotenv.config()
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
-const avatarUpload = multer({
-  dest: path.join(__dirname, process.env.AVATAR_UPLOAD_DIR),
-})
 
 const router = express.Router()
 
@@ -34,10 +24,8 @@ const generateToken = (user) => {
   return jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" })
 }
 
-router.post("/register", avatarUpload.single("avatar"), async (req, res) => {
-  const { username, password } = req.body
-  const avatar = req.file ? `/avatars/${req.file.filename}` : null
-
+router.post("/register", async (req, res) => {
+  const { username, password, avatar } = req.body
   try {
     const existingUser = await User.findOne({ username })
     if (existingUser) {
