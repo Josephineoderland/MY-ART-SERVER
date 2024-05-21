@@ -7,7 +7,7 @@ import { mapsRouter } from "./map/maps.js"
 import authRouter from "./auth/authRouter.js"
 import searchRouter from "./auth/searchRouter.js"
 import friendRequestRouter from "./auth/friendRequestRouter.js"
-
+import userRouter from "./auth/userRouter.js"
 const app = express()
 const port = process.env.SERVER_PORT || 3002
 
@@ -40,6 +40,7 @@ app.use("/maps", mapsRouter)
 app.use("/auth", authRouter)
 app.use("/search", searchRouter)
 app.use("/friends", friendRequestRouter)
+app.use("/userId", userRouter)
 
 app.listen(port, () => {
   console.log(`Chattservern lyssnar på port ${port}`)
