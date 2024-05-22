@@ -11,7 +11,7 @@ import userRouter from "./auth/userRouter.js"
 const app = express()
 const port = process.env.SERVER_PORT || 3002
 
-const allowedOrigins = ["http://localhost:3000", "http://localhost:3001"]
+const allowedOrigins = ["http://localhost:3000", "http://localhost:3002"]
 app.use(
   cors({
     origin: (origin, callback) => {
