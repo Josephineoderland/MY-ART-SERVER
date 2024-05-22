@@ -19,6 +19,8 @@ const friendshipRequestSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 })
 
+friendshipRequestSchema.index({ senderId: 1, receiverId: 1 }, { unique: true })
+
 const FriendshipRequest = mongoose.model(
   "FriendshipRequest",
   friendshipRequestSchema

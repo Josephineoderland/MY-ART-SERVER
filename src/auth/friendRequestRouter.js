@@ -30,16 +30,20 @@ friendRequestRouter.post("/send/:userId", async (req, res) => {
       return res.status(404).json({ message: "User not found" })
     }
 
+    // Kontrollera om en vänförfrågan redan finns
     const existingRequest = await FriendshipRequest.findOne({
       senderId,
-      userId,
+      receiverId: userId,
     })
 
     if (existingRequest) {
       return res.status(400).json({ message: "Friend request already sent" })
     }
 
-    const friendshipRequest = new FriendshipRequest({ senderId, receiverId: userId })
+    const friendshipRequest = new FriendshipRequest({
+      senderId,
+      receiverId: userId,
+    })
     await friendshipRequest.save()
     res.status(201).json({ message: "Friend request sent" })
   } catch (error) {
