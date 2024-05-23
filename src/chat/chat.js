@@ -35,7 +35,6 @@ router.post("/messages", async (req, res) => {
   if (!user || user.trim() === "") {
     return res.status(400).json({ error: "User is required" });
   }
-
   try {
     const newMessage = new ChatMessage({ text, user });
     await newMessage.save();
