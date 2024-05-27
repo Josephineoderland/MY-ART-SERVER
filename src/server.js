@@ -1,7 +1,5 @@
 import express from "express"
 import cors from "cors"
-import initializeSocket from "./chat/socketHandler.js"
-import http from "http"
 import listEndpoints from "express-list-endpoints"
 import apiRouter from "./api/api.js"
 import chatRouter from "./chat/chat.js"
