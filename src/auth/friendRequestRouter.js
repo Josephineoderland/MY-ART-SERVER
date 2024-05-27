@@ -8,7 +8,6 @@ dotenv.config()
 
 const friendRequestRouter = express.Router()
 
-// Middleware för att verifiera JWT-token
 const authenticateJWT = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1]
   if (!token) {
@@ -48,16 +47,17 @@ friendRequestRouter.get(
 )
 
 friendRequestRouter.post("/send/:userId", authenticateJWT, async (req, res) => {
-  const { userId } = req.params
-  const { senderId } = req.body
-  const { id: loggedInUserId } = req.user
+  const { userId } = req.params // Mottagarens ID
+  const { id: loggedInUserId } = req.user // Inloggade användarens ID
 
-  if (userId !== loggedInUserId) {
-    return res.status(403).json({ message: "Unauthorized" })
+  if (userId === loggedInUserId) {
+    return res
+      .status(403)
+      .json({ message: "Cannot send a friend request to yourself" })
   }
 
   try {
-    const sender = await User.findById(senderId)
+    const sender = await User.findById(loggedInUserId)
     const receiver = await User.findById(userId)
 
     if (!sender || !receiver) {
@@ -65,7 +65,7 @@ friendRequestRouter.post("/send/:userId", authenticateJWT, async (req, res) => {
     }
 
     const existingRequest = await FriendshipRequest.findOne({
-      senderId,
+      senderId: loggedInUserId,
       receiverId: userId,
     })
 
@@ -74,7 +74,7 @@ friendRequestRouter.post("/send/:userId", authenticateJWT, async (req, res) => {
     }
 
     const friendshipRequest = new FriendshipRequest({
-      senderId,
+      senderId: loggedInUserId,
       receiverId: userId,
     })
     await friendshipRequest.save()
