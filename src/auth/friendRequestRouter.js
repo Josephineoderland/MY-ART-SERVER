@@ -1,26 +1,60 @@
 import express from "express"
+import jwt from "jsonwebtoken"
 import FriendshipRequest from "./friendModel.js"
 import User from "./userModel.js"
+import dotenv from "dotenv"
+
+dotenv.config()
 
 const friendRequestRouter = express.Router()
 
-friendRequestRouter.get("/received/:userId", async (req, res) => {
-  const { userId } = req.params
-
-  try {
-    const receivedRequests = await FriendshipRequest.find({
-      receiverId: userId,
-      status: "pending",
-    }).populate("senderId", "username")
-    res.status(200).json(receivedRequests)
-  } catch (error) {
-    res.status(500).json({ message: "Server error" })
+// Middleware för att verifiera JWT-token
+const authenticateJWT = (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1]
+  if (!token) {
+    return res.status(401).json({ message: "Unauthorized" })
   }
-})
 
-friendRequestRouter.post("/send/:userId", async (req, res) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ message: "Forbidden" })
+    }
+    req.user = user
+    next()
+  })
+}
+
+friendRequestRouter.get(
+  "/received/:userId",
+  authenticateJWT,
+  async (req, res) => {
+    const { userId } = req.params
+    const { id: loggedInUserId } = req.user
+
+    if (userId !== loggedInUserId) {
+      return res.status(403).json({ message: "Unauthorized" })
+    }
+
+    try {
+      const receivedRequests = await FriendshipRequest.find({
+        receiverId: userId,
+        status: "pending",
+      }).populate("senderId", "username")
+      res.status(200).json(receivedRequests)
+    } catch (error) {
+      res.status(500).json({ message: "Server error" })
+    }
+  }
+)
+
+friendRequestRouter.post("/send/:userId", authenticateJWT, async (req, res) => {
   const { userId } = req.params
   const { senderId } = req.body
+  const { id: loggedInUserId } = req.user
+
+  if (userId !== loggedInUserId) {
+    return res.status(403).json({ message: "Unauthorized" })
+  }
 
   try {
     const sender = await User.findById(senderId)
@@ -50,7 +84,7 @@ friendRequestRouter.post("/send/:userId", async (req, res) => {
   }
 })
 
-friendRequestRouter.post("/respond", async (req, res) => {
+friendRequestRouter.post("/respond", authenticateJWT, async (req, res) => {
   const { requestId, status } = req.body
 
   if (!["accepted", "rejected"].includes(status)) {
