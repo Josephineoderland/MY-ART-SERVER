@@ -47,8 +47,8 @@ friendRequestRouter.get(
 )
 
 friendRequestRouter.post("/send/:userId", authenticateJWT, async (req, res) => {
-  const { userId } = req.params // Mottagarens ID
-  const { id: loggedInUserId } = req.user // Inloggade användarens ID
+  const { userId } = req.params
+  const { id: loggedInUserId } = req.user
 
   if (userId === loggedInUserId) {
     return res
@@ -69,8 +69,14 @@ friendRequestRouter.post("/send/:userId", authenticateJWT, async (req, res) => {
       receiverId: userId,
     })
 
-    if (existingRequest) {
+    if (existingRequest && existingRequest.status === "pending") {
       return res.status(400).json({ message: "Friend request already sent" })
+    }
+
+    if (existingRequest && existingRequest.status === "rejected") {
+      existingRequest.status = "pending"
+      await existingRequest.save()
+      return res.status(201).json({ message: "Friend request sent again" })
     }
 
     const friendshipRequest = new FriendshipRequest({
