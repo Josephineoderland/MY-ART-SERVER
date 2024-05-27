@@ -11,11 +11,11 @@ import userRouter from "./auth/userRouter.js"
 const app = express()
 const port = process.env.SERVER_PORT || 3002
 
-const allowedOrigins = ["http://localhost:3000", "http://localhost:3002"]
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      if (!origin || origin.startsWith("http://localhost")) {
         callback(null, true)
       } else {
         callback(new Error("Not allowed by CORS"))
