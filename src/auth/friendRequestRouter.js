@@ -112,4 +112,25 @@ friendRequestRouter.post("/respond", authenticateJWT, async (req, res) => {
   }
 })
 
+friendRequestRouter.get(
+  "/friends/:userId",
+  authenticateJWT,
+  async (req, res) => {
+    const { userId } = req.params
+
+    try {
+      const friends = await FriendshipRequest.find({
+        $or: [
+          { senderId: userId, status: "accepted" },
+          { receiverId: userId, status: "accepted" },
+        ],
+      }).populate("senderId receiverId", "username")
+
+      res.status(200).json(friends)
+    } catch (error) {
+      res.status(500).json({ message: "Server error" })
+    }
+  }
+)
+
 export default friendRequestRouter
