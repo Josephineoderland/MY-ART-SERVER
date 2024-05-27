@@ -1,5 +1,7 @@
 import express from "express"
 import cors from "cors"
+import initializeSocket from "./chat/socketHandler.js"
+import http from "http"
 import listEndpoints from "express-list-endpoints"
 import apiRouter from "./api/api.js"
 import chatRouter from "./chat/chat.js"
@@ -11,11 +13,10 @@ import userRouter from "./auth/userRouter.js"
 const app = express()
 const port = process.env.SERVER_PORT || 3002
 
-const allowedOrigins = ["http://localhost:3000", "http://localhost:3002"]
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      if (!origin || origin.startsWith("http://localhost")) {
         callback(null, true)
       } else {
         callback(new Error("Not allowed by CORS"))
