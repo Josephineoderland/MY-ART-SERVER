@@ -53,9 +53,7 @@ friendRequestRouter.post("/send/:userId", async (req, res) => {
 friendRequestRouter.post("/respond", async (req, res) => {
   const { requestId, status } = req.body
 
-  const lowercaseResponse = response.toLowerCase()
-
-  if (!["accepted", "rejected"].includes(lowercaseResponse)) {
+  if (!["accepted", "rejected"].includes(status)) {
     return res.status(400).json({ message: "Invalid status" })
   }
 
@@ -66,9 +64,9 @@ friendRequestRouter.post("/respond", async (req, res) => {
       return res.status(404).json({ message: "Friend request not found" })
     }
 
-    request.status = lowercaseResponse
+    request.status = status
     await request.save()
-    res.status(200).json({ message: `Friend request ${lowercaseResponse}` })
+    res.status(200).json({ message: `Friend request ${status}` })
   } catch (error) {
     res.status(500).json({ message: "Server error" })
   }
