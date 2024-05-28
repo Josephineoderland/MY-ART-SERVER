@@ -8,7 +8,6 @@ import authRouter from "./auth/authRouter.js"
 import searchRouter from "./auth/searchRouter.js"
 import friendRequestRouter from "./auth/friendRequestRouter.js"
 import userRouter from "./auth/userRouter.js"
-import { authenticateJWT } from "./authMiddleware.js"
 
 const app = express()
 const port = process.env.SERVER_PORT || 3002
@@ -34,7 +33,6 @@ app.get("/", (req, res) => {
   const endpoints = listEndpoints(app)
   res.json(endpoints)
 })
-app.use(authenticateJWT)
 
 app.use("/api", apiRouter)
 app.use("/", chatRouter)
