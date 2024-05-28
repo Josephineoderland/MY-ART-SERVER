@@ -16,7 +16,19 @@ const app = express()
 const port = process.env.SERVER_PORT || 3002
 
 const server = createServer(app)
-const io = new Server(server)
+const io = new Server(server, {
+  cors: {
+    origin: (origin, callback) => {
+      if (!origin || origin.startsWith("http://localhost")) {
+        callback(null, true)
+      } else {
+        callback(new Error("Not allowed by CORS"))
+      }
+    },
+    methods: ["GET", "POST"],
+    allowedHeaders: "Content-Type,Authorization",
+  },
+})
 
 app.use(
   cors({
