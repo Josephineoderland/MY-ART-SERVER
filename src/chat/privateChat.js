@@ -1,7 +1,7 @@
 import express from "express"
 import jwt from "jsonwebtoken"
 import PrivateChatMessage from "./PrivateChatMessage.js"
-import User from "../auth/userModel.js" 
+import User from "../auth/userModel.js"
 import dotenv from "dotenv"
 
 dotenv.config()
@@ -53,6 +53,19 @@ router.post("/sendMessage/:receiverId", authenticateJWT, async (req, res) => {
     await message.save()
 
     res.status(201).json(message)
+  } catch (error) {
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
+router.get("/messages/:receiverId", authenticateJWT, async (req, res) => {
+  const { receiverId } = req.params
+
+  try {
+    const messages = await PrivateChatMessage.find({
+      receiver: receiverId,
+    }).sort({ createdAt: -1 })
+    res.json(messages)
   } catch (error) {
     res.status(500).json({ message: "Server error" })
   }
