@@ -18,15 +18,8 @@ const port = process.env.SERVER_PORT || 3002
 const server = createServer(app)
 const io = new Server(server, {
   cors: {
-    origin: (origin, callback) => {
-      if (!origin || origin.startsWith("http://localhost")) {
-        callback(null, true)
-      } else {
-        callback(new Error("Not allowed by CORS"))
-      }
-    },
+    origin: "http://localhost:3001",
     methods: ["GET", "POST"],
-    allowedHeaders: "Content-Type,Authorization",
   },
 })
 

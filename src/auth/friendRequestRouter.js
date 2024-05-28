@@ -64,6 +64,13 @@ friendRequestRouter.post("/send/:userId", authenticateJWT, async (req, res) => {
       return res.status(404).json({ message: "User not found" })
     }
 
+    if (
+      sender.friends.includes(userId) ||
+      receiver.friends.includes(loggedInUserId)
+    ) {
+      return res.status(400).json({ message: "You are already friends." })
+    }
+
     const existingRequest = await FriendshipRequest.findOne({
       senderId: loggedInUserId,
       receiverId: userId,
