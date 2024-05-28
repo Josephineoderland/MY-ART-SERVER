@@ -119,13 +119,19 @@ friendRequestRouter.post("/respond", authenticateJWT, async (req, res) => {
 
   try {
     const request = await FriendshipRequest.findById(requestId)
-
     if (!request) {
       return res.status(404).json({ message: "Friend request not found" })
     }
-
     request.status = status
     await request.save()
+    if (status === "accepted") {
+      await User.findByIdAndUpdate(request.senderId, {
+        $addToSet: { friends: request.receiverId },
+      })
+      await User.findByIdAndUpdate(request.receiverId, {
+        $addToSet: { friends: request.senderId },
+      })
+    }
     res.status(200).json({ message: `Friend request ${status}` })
   } catch (error) {
     res.status(500).json({ message: "Server error" })
@@ -139,16 +145,18 @@ friendRequestRouter.get(
     const { userId } = req.params
 
     try {
-      const friends = await FriendshipRequest.find({
-        $or: [
-          { senderId: userId, status: "accepted" },
-          { receiverId: userId, status: "accepted" },
-        ],
-      }).populate("senderId receiverId", "username")
+      const userWithFriends = await User.findById(userId).populate(
+        "friends",
+        "username"
+      )
 
-      res.status(200).json(friends)
+      if (!userWithFriends) {
+        return res.status(404).json({ message: "Användare hittades inte" })
+      }
+
+      res.status(200).json(userWithFriends.friends)
     } catch (error) {
-      res.status(500).json({ message: "Server error" })
+      res.status(500).json({ message: "Serverfel" })
     }
   }
 )
