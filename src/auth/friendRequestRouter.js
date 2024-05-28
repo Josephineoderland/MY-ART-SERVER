@@ -1,5 +1,5 @@
 import express from "express"
-import jwt from "jsonwebtoken"
+import { authenticateJWT } from "../authMiddleware.js"
 import FriendshipRequest from "./friendModel.js"
 import User from "./userModel.js"
 import dotenv from "dotenv"
@@ -8,20 +8,7 @@ dotenv.config()
 
 const friendRequestRouter = express.Router()
 
-const authenticateJWT = (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1]
-  if (!token) {
-    return res.status(401).json({ message: "Unauthorized" })
-  }
-
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) {
-      return res.status(403).json({ message: "Forbidden" })
-    }
-    req.user = user
-    next()
-  })
-}
+friendRequestRouter.use(authenticateJWT)
 
 friendRequestRouter.get(
   "/received/:userId",
