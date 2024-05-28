@@ -9,9 +9,19 @@ import searchRouter from "./auth/searchRouter.js"
 import friendRequestRouter from "./auth/friendRequestRouter.js"
 import userRouter from "./auth/userRouter.js"
 import privateChatRouter from "./chat/privateChat.js"
+import { createServer } from "http"
+import { Server } from "socket.io"
 
 const app = express()
 const port = process.env.SERVER_PORT || 3002
+
+const server = createServer(app)
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost", // Anpassa till din frontend URL
+    methods: ["GET", "POST"],
+  },
+})
 
 app.use(
   cors({
@@ -43,6 +53,23 @@ app.use("/search", searchRouter)
 app.use("/friends", friendRequestRouter)
 app.use("/userId", userRouter)
 app.use("/private-chat", privateChatRouter)
+
+io.on("connection", (socket) => {
+  console.log("New client connected")
+
+  socket.on("joinRoom", ({ userId, friendId }) => {
+    const room = [userId, friendId].sort().join("-") // Skapa ett unikt rum baserat på användar-IDs
+    socket.join(room)
+  })
+
+  socket.on("sendMessage", ({ message, room }) => {
+    io.to(room).emit("message", message) // Skicka meddelandet endast till användarna i det specifika rummet
+  })
+
+  socket.on("disconnect", () => {
+    console.log("Client disconnected")
+  })
+})
 
 app.listen(port, () => {
   console.log(`Chattservern lyssnar på port ${port}`)
