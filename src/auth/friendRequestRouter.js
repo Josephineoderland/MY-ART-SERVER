@@ -90,6 +90,26 @@ friendRequestRouter.post("/send/:userId", authenticateJWT, async (req, res) => {
   }
 })
 
+friendRequestRouter.get("/sent/:userId", authenticateJWT, async (req, res) => {
+  const { userId } = req.params
+  const { id: loggedInUserId } = req.user
+
+  if (userId !== loggedInUserId) {
+    return res.status(403).json({ message: "Unauthorized" })
+  }
+
+  try {
+    const sentRequests = await FriendshipRequest.find({
+      senderId: userId,
+      status: "pending",
+    }).populate("receiverId", "username")
+
+    res.status(200).json(sentRequests)
+  } catch (error) {
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
 friendRequestRouter.post("/respond", authenticateJWT, async (req, res) => {
   const { requestId, status } = req.body
 
