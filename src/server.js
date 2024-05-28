@@ -16,13 +16,7 @@ const app = express()
 const port = process.env.SERVER_PORT || 3002
 
 const server = createServer(app)
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:3001", // Anpassa till din frontend URL
-    methods: ["GET", "POST"],
-    allowedHeaders: "Content-Type,Authorization",
-  },
-})
+const io = new Server(server)
 
 app.use(
   cors({
