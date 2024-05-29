@@ -8,9 +8,10 @@ import authRouter from "./auth/authRouter.js"
 import searchRouter from "./auth/searchRouter.js"
 import friendRequestRouter from "./auth/friendRequestRouter.js"
 import userRouter from "./auth/userRouter.js"
-import privateChatRouter from "./chat/privateChat.js"
+import {router as privateChatRouter, sendMessage} from "./chat/privateChat.js"
 import { createServer } from "http"
 import { Server } from "socket.io"
+import PrivateChatMessage from "./chat/PrivateChatMessage.js"
 
 const app = express()
 const port = process.env.SERVER_PORT || 3002
@@ -55,15 +56,25 @@ app.use("/userId", userRouter)
 app.use("/private-chat", privateChatRouter)
 
 io.on("connection", (socket) => {
+  // console.log(socket)
   console.log("New client connected")
 
-  socket.on("joinRoom", ({ userId, friendId }) => {
-    const room = [userId, friendId].sort().join("-") // Skapa ett unikt rum baserat på användar-IDs
+  socket.on("joinRoom", ({ userId, receiverId }) => {
+    console.log(`sendMessage(userId=${userId}, receiverId=${receiverId})`)
+    const room = [userId, receiverId].sort().join("-") // Skapa ett unikt rum baserat på användar-IDs
     socket.join(room)
   })
 
-  socket.on("sendMessage", ({ message, room }) => {
-    io.to(room).emit("message", { sender: "Server", text: message }) // Ensure message structure matches frontend expectations
+  socket.on("sendMessage", ({ message, userId, receiverId }) => {
+    console.log(`sendMessage(message=${message}, receiverId=${receiverId})`)
+    io.emit("message", { sender: "Server", text: message })
+    try {
+      sendMessage(userId, receiverId, message)
+    } catch (error) {
+      console.log(error)
+    }
+    // io.to(room).emit("message", { sender: "Server", text: message })
+
   })
 
   socket.on("disconnect", () => {

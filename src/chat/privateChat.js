@@ -8,6 +8,38 @@ dotenv.config()
 
 const router = express.Router()
 
+async function sendMessage(userId, receiverId, message) {
+    try {
+      const user = await User.findById(userId)
+      if (!user) {
+        throw new Error("User not found")
+      }
+
+      const receiver = await User.findById(receiverId)
+      if (!receiver) {
+        throw new Error("Receiver not found")
+        // return res.status(404).json({ message: "Receiver not found" })
+      }
+      
+      if (!user.friends.includes(receiverId)) {
+        throw new Error("Cannot send message to non-friend")
+        // return res
+        //   .status(403)
+        //   .json({ message: "Cannot send message to non-friend" })
+      }
+  
+      const chatMessage = new PrivateChatMessage({
+        sender: userId,
+        receiver: receiverId,
+        text: message,
+      })
+  
+      await chatMessage.save()
+    } catch (error) {
+      console.log(error)
+    }
+}
+
 const authenticateJWT = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1]
   if (!token) {
@@ -71,4 +103,4 @@ router.get("/messages/:receiverId", authenticateJWT, async (req, res) => {
   }
 })
 
-export default router
+export {router, sendMessage}
