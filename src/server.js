@@ -8,18 +8,19 @@ import authRouter from "./auth/authRouter.js"
 import searchRouter from "./auth/searchRouter.js"
 import friendRequestRouter from "./auth/friendRequestRouter.js"
 import userRouter from "./auth/userRouter.js"
-import {router as privateChatRouter, sendMessage} from "./chat/privateChat.js"
+import { router as privateChatRouter, sendMessage } from "./chat/privateChat.js"
 import { createServer } from "http"
 import { Server } from "socket.io"
 import PrivateChatMessage from "./chat/PrivateChatMessage.js"
+import User from "./auth/userModel.js"
 
 const app = express()
-const port = process.env.SERVER_PORT || 3002
+const port = process.env.SERVER_PORT || 3005
 
 const server = createServer(app)
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3001",
+    origin: "*",
     methods: ["GET", "POST"],
   },
 })
@@ -65,16 +66,17 @@ io.on("connection", (socket) => {
     socket.join(room)
   })
 
-  socket.on("sendMessage", ({ message, userId, receiverId }) => {
-    console.log(`sendMessage(message=${message}, receiverId=${receiverId})`)
-    io.emit("message", { sender: "Server", text: message })
-    try {
-      sendMessage(userId, receiverId, message)
-    } catch (error) {
-      console.log(error)
+  socket.on("sendMessage", async ({ message, userId, receiverId }) => {
+    console.log(`sendMessage(message=${message}, userId=${userId}, receiverId=${receiverId})`)
+    const sender = await User.findById(userId)
+    if (!sender) {
+      console.log("Sender not found: " + userId)
+      return
     }
+    // await User.findById(userId)
+    io.emit("message", { sender: sender.username, text: message })
+    sendMessage(userId, receiverId, message)
     // io.to(room).emit("message", { sender: "Server", text: message })
-
   })
 
   socket.on("disconnect", () => {

@@ -8,38 +8,6 @@ dotenv.config()
 
 const router = express.Router()
 
-async function sendMessage(userId, receiverId, message) {
-    try {
-      const user = await User.findById(userId)
-      if (!user) {
-        throw new Error("User not found")
-      }
-
-      const receiver = await User.findById(receiverId)
-      if (!receiver) {
-        throw new Error("Receiver not found")
-        // return res.status(404).json({ message: "Receiver not found" })
-      }
-      
-      if (!user.friends.includes(receiverId)) {
-        throw new Error("Cannot send message to non-friend")
-        // return res
-        //   .status(403)
-        //   .json({ message: "Cannot send message to non-friend" })
-      }
-  
-      const chatMessage = new PrivateChatMessage({
-        sender: userId,
-        receiver: receiverId,
-        text: message,
-      })
-  
-      await chatMessage.save()
-    } catch (error) {
-      console.log(error)
-    }
-}
-
 const authenticateJWT = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1]
   if (!token) {
@@ -53,6 +21,35 @@ const authenticateJWT = (req, res, next) => {
     req.user = user
     next()
   })
+}
+
+async function sendMessage(userId, receiverId, message) {
+  try {
+    const sender = await User.findById(userId)
+    if (!sender) {
+      throw new Error("User not found")
+    }
+
+    const receiver = await User.findById(receiverId)
+    if (!receiver) {
+      throw new Error("Receiver not found")
+    }
+
+    if (!sender.friends.some((friend) => friend.equals(receiver._id))) {
+      throw new Error("Cannot send message to non-friend")
+    }
+
+    const chatMessage = new PrivateChatMessage({
+      sender: userId,
+      receiver: receiverId,
+      text: message,
+    })
+
+    await chatMessage.save()
+  } catch (error) {
+    console.error(`Error sending message: ${error.message}`)
+    // throw error
+  }
 }
 
 router.post("/sendMessage/:receiverId", authenticateJWT, async (req, res) => {
@@ -94,13 +91,27 @@ router.get("/messages/:receiverId", authenticateJWT, async (req, res) => {
   const { receiverId } = req.params
 
   try {
-    const messages = await PrivateChatMessage.find({
-      receiver: receiverId,
-    }).sort({ createdAt: -1 })
+    const messages = await PrivateChatMessage.find()
+      .or([
+        {
+          sender: req.user.id,
+          receiver: receiverId,
+        },
+        {
+          sender: receiverId,
+          receiver: req.user.id,
+        },
+      ])
+      .populate({
+        path: "sender",
+        select: "username",
+        transform: (doc) => (doc == null ? null : doc.username),
+      })
+      .sort({ createdAt: -1 })
     res.json(messages)
   } catch (error) {
     res.status(500).json({ message: "Server error" })
   }
 })
 
-export {router, sendMessage}
+export { router, sendMessage }
