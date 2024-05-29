@@ -63,7 +63,7 @@ io.on("connection", (socket) => {
   })
 
   socket.on("sendMessage", ({ message, room }) => {
-    io.to(room).emit("message", message) // Skicka meddelandet endast till användarna i det specifika rummet
+    io.to(room).emit("message", { sender: "Server", text: message }) // Ensure message structure matches frontend expectations
   })
 
   socket.on("disconnect", () => {
