@@ -59,24 +59,12 @@ io.on("connection", (socket) => {
   console.log("New client connected")
 
   socket.on("joinRoom", ({ userId, friendId }) => {
-    const room = [userId, friendId].sort().join("-")
+    const room = [userId, friendId].sort().join("-") // Skapa ett unikt rum baserat på användar-IDs
     socket.join(room)
-    console.log(`User ${userId} joined room ${room}`)
   })
 
-  socket.on("sendMessage", async ({ message, userId, friendId }) => {
-    const room = [userId, friendId].sort().join("-")
-
-    const newMessage = new PrivateChatMessage({
-      sender: userId,
-      receiver: friendId,
-      text: message,
-    })
-
-    await newMessage.save()
-
-    io.to(room).emit("message", { sender: userId, text: message })
-    console.log(`Message sent to room ${room}: ${message}`)
+  socket.on("sendMessage", ({ message, room }) => {
+    io.to(room).emit("message", { sender: "Server", text: message }) // Ensure message structure matches frontend expectations
   })
 
   socket.on("disconnect", () => {
