@@ -11,8 +11,13 @@ import userRouter from "./auth/userRouter.js"
 import { router as privateChatRouter, sendMessage } from "./chat/privateChat.js"
 import { createServer } from "http"
 import { Server } from "socket.io"
-import PrivateChatMessage from "./chat/PrivateChatMessage.js"
 import User from "./auth/userModel.js"
+import postRouter from "./myPage/posts.js"
+import path from "path"
+import { fileURLToPath } from "url"
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const app = express()
 const port = process.env.SERVER_PORT || 3005
@@ -42,6 +47,8 @@ app.use(
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
+app.use("/uploads", express.static(path.join(__dirname, "./uploads")))
+
 app.get("/", (req, res) => {
   const endpoints = listEndpoints(app)
   res.json(endpoints)
@@ -55,6 +62,7 @@ app.use("/search", searchRouter)
 app.use("/friends", friendRequestRouter)
 app.use("/userId", userRouter)
 app.use("/private-chat", privateChatRouter)
+app.use("/my-page", postRouter)
 
 io.on("connection", (socket) => {
   // console.log(socket)
@@ -67,7 +75,9 @@ io.on("connection", (socket) => {
   })
 
   socket.on("sendMessage", async ({ message, userId, receiverId }) => {
-    console.log(`sendMessage(message=${message}, userId=${userId}, receiverId=${receiverId})`)
+    console.log(
+      `sendMessage(message=${message}, userId=${userId}, receiverId=${receiverId})`
+    )
     const sender = await User.findById(userId)
     if (!sender) {
       console.log("Sender not found: " + userId)
