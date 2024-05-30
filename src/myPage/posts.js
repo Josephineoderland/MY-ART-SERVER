@@ -66,4 +66,20 @@ router.post("/posts", upload.single("image"), async (req, res) => {
   }
 })
 
+router.get("/posts", async (req, res) => {
+  try {
+    const { userId } = req.query
+    let posts
+    if (userId) {
+      posts = await Post.find({ userId }).sort({ createdAt: -1 })
+    } else {
+      posts = await Post.find().sort({ createdAt: -1 })
+    }
+    res.status(200).json(posts)
+  } catch (error) {
+    console.error("Error fetching posts:", error)
+    res.status(500).json({ error: "Internal server error" })
+  }
+})
+
 export default router
