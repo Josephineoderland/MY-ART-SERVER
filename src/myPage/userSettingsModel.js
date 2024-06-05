@@ -7,6 +7,7 @@ const userSettingsSchema = new mongoose.Schema({
   age: { type: Number, required: true },
   occupation: { type: String, required: true },
   description: { type: String, required: true },
+  backgroundColor: { type: String, default: "#ffffff" },
 })
 
 const UserSettings = mongoose.model("UserSettings", userSettingsSchema)

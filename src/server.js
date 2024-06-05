@@ -33,7 +33,11 @@ const io = new Server(server, {
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || origin.startsWith("http://localhost")) {
+      if (
+        !origin ||
+        origin.startsWith("http://localhost") ||
+        origin.startsWith("https://art.dev.josephine.nu")
+      ) {
         callback(null, true)
       } else {
         callback(new Error("Not allowed by CORS"))
@@ -47,31 +51,37 @@ app.use(
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-app.use("/uploads", express.static(path.join(__dirname, "./uploads")))
-app.use("/profile-uploads", express.static(path.join(__dirname, "./profile-uploads")))
+const router = express.Router()
 
-app.get("/", (req, res) => {
+router.use("/uploads", express.static(path.join(__dirname, "./uploads")))
+router.use(
+  "/profile-uploads",
+  express.static(path.join(__dirname, "./profile-uploads"))
+)
+
+router.get("/", (req, res) => {
   const endpoints = listEndpoints(app)
   res.json(endpoints)
 })
 
-app.use("/api", apiRouter)
-app.use("/", chatRouter)
-app.use("/maps", mapsRouter)
-app.use("/auth", authRouter)
-app.use("/search", searchRouter)
-app.use("/friends", friendRequestRouter)
-app.use("/userId", userRouter)
-app.use("/private-chat", privateChatRouter)
-app.use("/my-page", postRouter)
+router.use("/api", apiRouter)
+router.use("/", chatRouter)
+router.use("/maps", mapsRouter)
+router.use("/auth", authRouter)
+router.use("/search", searchRouter)
+router.use("/friends", friendRequestRouter)
+router.use("/userId", userRouter)
+router.use("/private-chat", privateChatRouter)
+router.use("/my-page", postRouter)
+
+app.use("/api", router)
 
 io.on("connection", (socket) => {
-  // console.log(socket)
   console.log("New client connected")
 
   socket.on("joinRoom", ({ userId, receiverId }) => {
     console.log(`sendMessage(userId=${userId}, receiverId=${receiverId})`)
-    const room = [userId, receiverId].sort().join("-") // Skapa ett unikt rum baserat på användar-IDs
+    const room = [userId, receiverId].sort().join("-")
     socket.join(room)
   })
 
@@ -84,10 +94,13 @@ io.on("connection", (socket) => {
       console.log("Sender not found: " + userId)
       return
     }
-    // await User.findById(userId)
-    io.emit("message", { sender: sender.username, text: message })
+
+    io.emit("message", {
+      sender: sender.username,
+      userId: userId,
+      text: message,
+    })
     sendMessage(userId, receiverId, message)
-    // io.to(room).emit("message", { sender: "Server", text: message })
   })
 
   socket.on("disconnect", () => {

@@ -45,14 +45,6 @@ async function sendMessage(userId, receiverId, message) {
       text: message,
     })
 
-     if (userId === userId) { 
-      chatMessage.isSenderLeft = false; 
-    } else {
-      chatMessage.isSenderLeft = true; 
-    }
-
-    await chatMessage.save();
-
     await chatMessage.save()
   } catch (error) {
     console.error(`Error sending message: ${error.message}`)
@@ -114,8 +106,71 @@ router.get("/messages/:receiverId", authenticateJWT, async (req, res) => {
         select: "username",
         transform: (doc) => (doc == null ? null : doc.username),
       })
-      .sort({ createdAt: -1 })
+      .select({
+        sender: 1,
+        text: 1,
+        _id: 0,
+        userId: "$sender",
+        timestamp: "$createdAt"
+      })
+      .sort({ createdAt: 1 })
     res.json(messages)
+  } catch (error) {
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
+router.get("/unread-count", authenticateJWT, async (req, res) => {
+  try {
+    const unreadCount = await PrivateChatMessage.countDocuments({
+      receiver: req.user.id,
+      isRead: false,
+    })
+
+    res.json({ unreadCount })
+  } catch (error) {
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
+router.get("/unread-counts", authenticateJWT, async (req, res) => {
+  try {
+    const unreadCounts = await PrivateChatMessage.aggregate([
+      { $match: { receiver: req.user.id, isRead: false } },
+      { $group: { _id: "$sender", count: { $sum: 1 } } },
+    ])
+
+    const counts = {}
+    unreadCounts.forEach((item) => {
+      counts[item._id] = item.count
+    })
+
+    res.json({ unreadCounts: counts })
+  } catch (error) {
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
+router.post("/markAsRead", authenticateJWT, async (req, res) => {
+  try {
+    await PrivateChatMessage.updateMany(
+      { receiver: req.user.id, isRead: false },
+      { $set: { isRead: true } }
+    )
+    res.status(200).json({ message: "Messages marked as read" })
+  } catch (error) {
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
+router.post("/markAsRead/:senderId", authenticateJWT, async (req, res) => {
+  try {
+    const { senderId } = req.params
+    await PrivateChatMessage.updateMany(
+      { receiver: req.user.id, sender: senderId, isRead: false },
+      { $set: { isRead: true } }
+    )
+    res.status(200).json({ message: "Messages marked as read" })
   } catch (error) {
     res.status(500).json({ message: "Server error" })
   }

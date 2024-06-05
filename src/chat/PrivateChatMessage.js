@@ -1,6 +1,4 @@
 import mongoose from "mongoose"
-// @ts-ignore
-import User from "../auth/userModel.js"
 
 const privateChatMessageSchema = new mongoose.Schema({
   sender: {
@@ -17,13 +15,13 @@ const privateChatMessageSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  isSenderLeft: {
-    type: Boolean,
-    default: false, 
-  },
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  isRead: {
+    type: Boolean,
+    default: false,
   },
 })
 

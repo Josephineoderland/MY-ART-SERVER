@@ -113,7 +113,8 @@ router.get("/posts/:userId", async (req, res) => {
 
 router.post("/settings", authenticateJWT, async (req, res) => {
   try {
-    const { email, instagram, age, occupation, description } = req.body
+    const { email, instagram, age, occupation, description, backgroundColor } =
+      req.body
 
     let userSettings = await UserSettings.findOne({ userId: req.user.id })
     if (userSettings) {
@@ -122,6 +123,7 @@ router.post("/settings", authenticateJWT, async (req, res) => {
       userSettings.age = age
       userSettings.occupation = occupation
       userSettings.description = description
+      userSettings.backgroundColor = backgroundColor
     } else {
       userSettings = new UserSettings({
         userId: req.user.id,
@@ -130,6 +132,7 @@ router.post("/settings", authenticateJWT, async (req, res) => {
         age,
         occupation,
         description,
+        backgroundColor,
       })
     }
 
