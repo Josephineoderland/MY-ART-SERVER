@@ -48,6 +48,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 app.use("/uploads", express.static(path.join(__dirname, "./uploads")))
+app.use("/profile-uploads", express.static(path.join(__dirname, "./profile-uploads")))
 
 app.get("/", (req, res) => {
   const endpoints = listEndpoints(app)

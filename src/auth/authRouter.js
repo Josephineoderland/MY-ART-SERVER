@@ -3,9 +3,15 @@ import jwt from "jsonwebtoken"
 import mongoose from "mongoose"
 import User from "./userModel.js"
 import dotenv from "dotenv"
+import { fileURLToPath } from "url"
+import multer from "multer"
+import path from "path"
+import fs from "fs"
 
 dotenv.config()
 
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 const router = express.Router()
 
 mongoose.connect(`mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}`, {
@@ -24,7 +30,24 @@ const generateToken = (user) => {
   return jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" })
 }
 
-router.post("/register", async (req, res) => {
+const profileUploadsDir = path.join(__dirname, "../profile-uploads")
+if (!fs.existsSync(profileUploadsDir)) {
+  fs.mkdirSync(profileUploadsDir)
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, profileUploadsDir)
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9)
+    cb(null, uniqueSuffix + path.extname(file.originalname))
+  },
+})
+
+const upload = multer({ storage: storage })
+
+router.post("/register", upload.single("profileImage"), async (req, res) => {
   const { username, password } = req.body
 
   try {
@@ -33,7 +56,8 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ message: "Username already taken" })
     }
 
-    const user = new User({ username, password })
+    const profileImageUrl = req.file ? `/profile-uploads/${req.file.filename}` : null
+    const user = new User({ username, password, profileImageUrl })
     await user.save()
     const token = generateToken(user)
 

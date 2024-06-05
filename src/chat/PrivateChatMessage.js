@@ -17,6 +17,10 @@ const privateChatMessageSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  isSenderLeft: {
+    type: Boolean,
+    default: false, 
+  },
   createdAt: {
     type: Date,
     default: Date.now,

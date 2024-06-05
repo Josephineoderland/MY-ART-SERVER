@@ -45,10 +45,17 @@ async function sendMessage(userId, receiverId, message) {
       text: message,
     })
 
+     if (userId === userId) { 
+      chatMessage.isSenderLeft = false; 
+    } else {
+      chatMessage.isSenderLeft = true; 
+    }
+
+    await chatMessage.save();
+
     await chatMessage.save()
   } catch (error) {
     console.error(`Error sending message: ${error.message}`)
-    // throw error
   }
 }
 

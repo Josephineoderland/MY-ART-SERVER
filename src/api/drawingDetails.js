@@ -1,55 +1,61 @@
 const data = {
-  hair: {
+  Hair: {
     length: ["Short", "Medium-length", "Long"],
     type: ["Straight", "Curly", "Wavy"],
     color: ["Blonde", "Brown", "Black", "Red", "Gray", "Pink"],
     texture: ["Shiny", "Matte", "Rough"],
     style: ["Updo", "Down", "Braids", "Ponytails", "Bangs"],
-    accessories: ["Hats", "Headbands", "Clips", "Tiaras"]
+    accessories: ["Hats", "Headbands", "Clips", "Tiaras"],
   },
-  faceShape: {
+FaceShape: {
     shape: ["Oval", "Round", "Square", "Heart-shaped"],
     chin: ["Pointed", "Rounded", "Defined", "Smooth"],
     cheekbones: ["Prominent", "Subtle", "High-set", "Low-set"],
     forehead: ["Wide", "Narrow", "High", "Low"],
-    jawline: ["Defined", "Soft", "Straight", "V-shaped"]
+    jawline: ["Defined", "Soft", "Straight", "V-shaped"],
   },
-  nose: {
+  Nose: {
     width: ["Wide", "Narrow", "Medium-width"],
     length: ["Short", "Medium-length", "Long"],
     shape: ["Straight", "Curved", "Crooked", "Button nose"],
-    nostrils: ["Large", "Small", "Pronounced", "Subtle"]
+    nostrils: ["Large", "Small", "Pronounced", "Subtle"],
   },
-  eyes: {
+  Eyes: {
     shape: ["Almond", "Droopy", "Almond-shaped", "Round"],
     eyelids: ["Open", "Half-open", "Closed", "Sleeping"],
-    eyelashes: ["Long", "Short", "Thick", "Separated"]
+    eyelashes: ["Long", "Short", "Thick", "Separated"],
   },
-  mouth: {
+  Mouth: {
     width: ["Narrow", "Wide"],
     lipShape: ["Full", "Thin", "Asymmetrical"],
     expression: ["Tightly closed", "Partially open", "Smiling", "Wrinkled"],
     naturalShape: ["Heart-shaped", "Round", "Square", "Triangular"],
-    corners: ["Upturned", "Downturned", "Neutral"]
+    corners: ["Upturned", "Downturned", "Neutral"],
   },
-  posture: {
+  Posture: {
     bodyPosition: ["Upright", "Leaning forward", "Leaning backward"],
     shoulders: ["Raised", "Lowered", "Level"],
-    headAngle: ["Straight ahead", "Turned sideways", "Tilted"]
+    headAngle: ["Straight ahead", "Turned sideways", "Tilted"],
   },
-  clothing: {
+  Clothing: {
     style: ["Classic", "Modern", "Retro", "Sporty", "Elegant", "Casual"],
     colors: ["Light", "Dark", "Pastel", "Neon", "Solid", "Patterned"],
     patterns: ["Striped", "Checkered", "Floral", "Animal print", "Geometric"],
-    accessories: ["Necklaces", "Bracelets", "Hats", "Glasses", "Bags", "Shoes"]
+    accessories: ["Necklaces", "Bracelets", "Hats", "Glasses", "Bags", "Shoes"],
   },
-  physicalFeatures: {
+  PhysicalFeatures: {
     freckles: ["Few", "Many", "Scattered", "Concentrated in certain areas"],
-    wrinkles: ["Deep", "Superficial", "Around the eyes", "Around the mouth", "On the forehead"]
+    wrinkles: [
+      "Deep",
+      "Superficial",
+      "Around the eyes",
+      "Around the mouth",
+      "On the forehead",
+    ],
   },
-  age: {
-    howOld: ["kid", "Old", "adult"]
-  }
-};
+  Age: {
+    age: ["kid", "Old", "adult"],
+  },
+}
 
-export default data;
+export default data
